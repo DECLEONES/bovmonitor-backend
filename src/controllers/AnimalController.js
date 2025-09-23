@@ -2,17 +2,33 @@
 const connection = require('../db/connection.js');
 
 module.exports = {
-  // Método para listar todos os animais do usuário logado
-  async index(request, response) {
-    // Pegamos o ID do usuário que foi salvo pelo middleware de autenticação
+// ...dentro do module.exports
+async index(request, response) {
     const user_id = request.userId;
+    // Pega os filtros 'sex' e 'category' do URL (query params)
+    const { sex, category } = request.query;
 
-    const animals = await connection('animals')
-      .where('user_id', user_id)
-      .select('*');
+    // Inicia a construção da consulta ao banco de dados
+    let query = connection('animals')
+        .where('user_id', user_id)
+        .select('*');
+
+    // Se um filtro de sexo foi fornecido, adiciona-o à consulta
+    if (sex) {
+        query.andWhere('sex', sex);
+    }
+
+    // Se um filtro de categoria foi fornecido, adiciona-o à consulta
+    if (category) {
+        query.andWhere('category', 'like', `%${category}%`);
+    }
+
+    // Executa a consulta final
+    const animals = await query;
 
     return response.json(animals);
-  },
+},
+// ...
 
   // Método para cadastrar um novo animal
   async create(request, response) {
