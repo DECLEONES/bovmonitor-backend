@@ -1,16 +1,16 @@
-// src/routes/routes.js
 const express = require('express');
 
 // Importação de todos os Controllers
 const UserController = require('../controllers/UserController');
 const SessionController = require('../controllers/SessionController');
+const DashboardController = require('../controllers/DashboardController');
 const AnimalController = require('../controllers/AnimalController');
 const WeightController = require('../controllers/WeightController');
-const DashboardController = require('../controllers/DashboardController');
-const EventController = require('../controllers/EventController'); // 1. IMPORTE
+const EventController = require('../controllers/EventController');
 
-// Importação do Middleware
+// Middlewares
 const authMiddleware = require('../middlewares/auth.js');
+const permit = require('../middlewares/authRole.js');
 
 const routes = express.Router();
 
@@ -18,26 +18,26 @@ const routes = express.Router();
 routes.post('/users', UserController.create);
 routes.post('/sessions', SessionController.create);
 
-// --- Middleware de Autenticação ---
+// --- Middleware de Autenticação (todas as rotas abaixo exigem login) ---
 routes.use(authMiddleware);
 
 // --- Rotas Protegidas ---
+routes.get('/dashboard', DashboardController.show);
 
-// Rota do Dashboard
-routes.get('/dashboard', DashboardController.index);
-
-// Rotas de Animais
 routes.get('/animals', AnimalController.index);
-routes.post('/animals', AnimalController.create);
-routes.put('/animals/:id', AnimalController.update);
-routes.delete('/animals/:id', AnimalController.delete);
+// Apenas ADMIN e FUNCIONARIO podem criar um animal
+routes.post('/animals', permit(['ADMIN', 'FUNCIONARIO']), AnimalController.create);
+// Apenas ADMIN e FUNCIONARIO podem editar um animal
+routes.put('/animals/:id', permit(['ADMIN', 'FUNCIONARIO']), AnimalController.update);
+// APENAS UM ADMIN PODE APAGAR UM ANIMAL
+routes.delete('/animals/:id', permit(['ADMIN']), AnimalController.delete);
 
-// Rotas de Pesos
 routes.get('/animals/:animal_id/weights', WeightController.index);
-routes.post('/animals/:animal_id/weights', WeightController.create);
+// Apenas ADMIN e FUNCIONARIO podem adicionar peso
+routes.post('/animals/:animal_id/weights', permit(['ADMIN', 'FUNCIONARIO']), WeightController.create);
 
-// Rotas de Eventos
-routes.get('/events', EventController.index);     // 2. ADICIONE
-routes.post('/events', EventController.create);    // 3. ADICIONE
+routes.get('/events', EventController.index);
+// Apenas ADMIN e FUNCIONARIO podem criar eventos
+routes.post('/events', permit(['ADMIN', 'FUNCIONARIO']), EventController.create);
 
 module.exports = routes;
