@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path'); // Importa o módulo 'path' do Node.js
+require('dotenv').config({ path: path.resolve(__dirname, './.env') }); // Garante que o .env é encontrado a partir da raiz
 
 module.exports = {
   development: {
@@ -11,19 +12,20 @@ module.exports = {
       database: process.env.DB_NAME,
     },
     migrations: {
-      directory: './src/db/migrations'
+      // Usa o caminho absoluto para a pasta de migrações
+      directory: path.resolve(__dirname, 'src', 'db', 'migrations')
     }
   },
 
-  // --- SECÇÃO NOVA E IMPORTANTE ---
   production: {
     client: 'pg',
     connection: {
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false } // Necessário para conexões na Render
+      ssl: { rejectUnauthorized: false }
     },
     migrations: {
-      directory: './src/db/migrations'
+      // Usa o caminho absoluto para a pasta de migrações
+      directory: path.resolve(__dirname, 'src', 'db', 'migrations')
     }
   }
 };
