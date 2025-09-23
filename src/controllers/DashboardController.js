@@ -2,7 +2,8 @@
 const connection = require('../db/connection.js');
 
 module.exports = {
-  async index(request, response) {
+  // CORRIGIDO: A função foi renomeada de 'index' para 'show'
+  async show(request, response) { 
     const user_id = request.userId;
 
     try {
