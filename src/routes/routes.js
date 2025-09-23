@@ -25,19 +25,14 @@ routes.use(authMiddleware);
 routes.get('/dashboard', DashboardController.show);
 
 routes.get('/animals', AnimalController.index);
-// Apenas ADMIN e FUNCIONARIO podem criar um animal
 routes.post('/animals', permit(['ADMIN', 'FUNCIONARIO']), AnimalController.create);
-// Apenas ADMIN e FUNCIONARIO podem editar um animal
 routes.put('/animals/:id', permit(['ADMIN', 'FUNCIONARIO']), AnimalController.update);
-// APENAS UM ADMIN PODE APAGAR UM ANIMAL
 routes.delete('/animals/:id', permit(['ADMIN']), AnimalController.delete);
 
 routes.get('/animals/:animal_id/weights', WeightController.index);
-// Apenas ADMIN e FUNCIONARIO podem adicionar peso
 routes.post('/animals/:animal_id/weights', permit(['ADMIN', 'FUNCIONARIO']), WeightController.create);
 
 routes.get('/events', EventController.index);
-// Apenas ADMIN e FUNCIONARIO podem criar eventos
 routes.post('/events', permit(['ADMIN', 'FUNCIONARIO']), EventController.create);
 
 module.exports = routes;
