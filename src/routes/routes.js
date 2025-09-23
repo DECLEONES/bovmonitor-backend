@@ -23,7 +23,7 @@ routes.use(authMiddleware);
 
 // --- Rotas Protegidas ---
 routes.get('/dashboard', DashboardController.show);
-
+routes.put('/users/:id', UserController.update);
 routes.get('/animals', AnimalController.index);
 routes.post('/animals', permit(['ADMIN', 'FUNCIONARIO']), AnimalController.create);
 routes.put('/animals/:id', permit(['ADMIN', 'FUNCIONARIO']), AnimalController.update);
