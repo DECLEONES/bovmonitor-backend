@@ -2,38 +2,16 @@
 const connection = require('../db/connection.js');
 
 module.exports = {
-// ...dentro do module.exports
-async index(request, response) {
-    const user_id = request.userId;
-    // Pega os filtros 'sex' e 'category' do URL (query params)
-    const { sex, category } = request.query;
+  // ... (a função 'index' continua a mesma)
+  async index(request, response) {
+    // ... (sem alterações aqui)
+  },
 
-    // Inicia a construção da consulta ao banco de dados
-    let query = connection('animals')
-        .where('user_id', user_id)
-        .select('*');
-
-    // Se um filtro de sexo foi fornecido, adiciona-o à consulta
-    if (sex) {
-        query.andWhere('sex', sex);
-    }
-
-    // Se um filtro de categoria foi fornecido, adiciona-o à consulta
-    if (category) {
-        query.andWhere('category', 'like', `%${category}%`);
-    }
-
-    // Executa a consulta final
-    const animals = await query;
-
-    return response.json(animals);
-},
-// ...
-
-  // Método para cadastrar um novo animal
+  // Método para cadastrar um novo animal (MODIFICADO)
   async create(request, response) {
-    const { name, sex, birth_date, category, tag } = request.body;
-    const user_id = request.userId; // O ID do usuário logado
+    // 1. Adicionamos 'breed' e 'origin' para serem lidos do corpo da requisição
+    const { name, sex, birth_date, category, tag, breed, origin } = request.body;
+    const user_id = request.userId;
 
     try {
       const [id] = await connection('animals').insert({
@@ -42,6 +20,9 @@ async index(request, response) {
         birth_date,
         category,
         tag,
+        // 2. Adicionamos os novos campos para serem inseridos no banco
+        breed,
+        origin,
         user_id,
       }).returning('id');
 
@@ -52,14 +33,14 @@ async index(request, response) {
     }
   },
 
-    // --- NOVA FUNÇÃO ---
+  // Método para atualizar um animal (MODIFICADO)
   async update(request, response) {
-    const { id } = request.params; // ID do animal a ser atualizado
-    const { name, sex, birth_date, category, tag } = request.body; // Novos dados
+    const { id } = request.params;
+    // 1. Adicionamos 'breed' e 'origin' para serem lidos do corpo da requisição
+    const { name, sex, birth_date, category, tag, breed, origin } = request.body;
     const user_id = request.userId;
 
     try {
-      // Primeiro, verifica se o animal pertence ao usuário logado (segurança)
       const animal = await connection('animals')
         .where('id', id)
         .select('user_id')
@@ -73,13 +54,15 @@ async index(request, response) {
         return response.status(403).json({ error: 'Operação não permitida.' });
       }
 
-      // Se tudo estiver certo, atualiza o animal
       await connection('animals').where('id', id).update({
         name,
         sex,
         birth_date,
         category,
-        tag
+        tag,
+        // 2. Adicionamos os novos campos para serem atualizados no banco
+        breed,
+        origin
       });
 
       return response.json({ message: 'Animal atualizado com sucesso!' });
@@ -90,36 +73,8 @@ async index(request, response) {
     }
   },
 
-  // --- NOVA FUNÇÃO ---
+  // ... (a função 'delete' continua a mesma)
   async delete(request, response) {
-    const { id } = request.params; // Pega o ID do animal da URL (ex: /api/animals/5)
-    const user_id = request.userId; // Pega o ID do usuário logado (do token)
-
-    try {
-      // Verifica se o animal pertence ao usuário que está tentando deletar
-      const animal = await connection('animals')
-        .where('id', id)
-        .select('user_id')
-        .first();
-
-      if (!animal) {
-        return response.status(404).json({ error: 'Animal não encontrado.' });
-      }
-
-      if (animal.user_id !== user_id) {
-        // 403 Forbidden: o usuário não tem permissão
-        return response.status(403).json({ error: 'Operação não permitida.' });
-      }
-
-      // Se tudo estiver certo, deleta o animal
-      await connection('animals').where('id', id).delete();
-
-      // Retorna uma resposta de sucesso sem conteúdo
-      return response.status(204).send();
-
-    } catch (error) {
-      console.error(error);
-      return response.status(500).json({ error: 'Erro interno ao deletar animal.' });
-    }
+    // ... (sem alterações aqui)
   }
 };

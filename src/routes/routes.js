@@ -8,6 +8,8 @@ const AnimalController = require('../controllers/AnimalController');
 const WeightController = require('../controllers/WeightController');
 const EventController = require('../controllers/EventController');
 const VaccineController = require('../controllers/VaccineController');
+// 1. Importamos o novo PastureController
+const PastureController = require('../controllers/PastureController');
 
 // Middlewares
 const authMiddleware = require('../middlewares/auth.js');
@@ -25,22 +27,31 @@ routes.use(authMiddleware);
 // --- Rotas Protegidas ---
 routes.get('/dashboard', DashboardController.show);
 routes.put('/users/:id', UserController.update);
+
+// Rotas de Animais
 routes.get('/animals', AnimalController.index);
 routes.post('/animals', permit(['ADMIN', 'FUNCIONARIO']), AnimalController.create);
 routes.put('/animals/:id', permit(['ADMIN', 'FUNCIONARIO']), AnimalController.update);
 routes.delete('/animals/:id', permit(['ADMIN']), AnimalController.delete);
 
+// Rotas de Pesos
 routes.get('/animals/:animal_id/weights', WeightController.index);
 routes.post('/animals/:animal_id/weights', permit(['ADMIN', 'FUNCIONARIO']), WeightController.create);
 
-// --- Rotas de Vacinas ---
+// Rotas de Vacinas
 routes.get('/animals/:animal_id/vaccines', VaccineController.index);
 routes.post('/animals/:animal_id/vaccines', permit(['ADMIN', 'FUNCIONARIO']), VaccineController.create);
 
-routes.get('/events', EventController.index);
-// ...
-
+// Rotas de Eventos
 routes.get('/events', EventController.index);
 routes.post('/events', permit(['ADMIN', 'FUNCIONARIO']), EventController.create);
+
+// 2. Adicionamos as novas rotas para Pastos
+// --- Rotas de Pastos ---
+routes.get('/pastures', PastureController.index);
+routes.post('/pastures', permit(['ADMIN', 'FUNCIONARIO']), PastureController.create);
+routes.put('/pastures/:id', permit(['ADMIN', 'FUNCIONARIO']), PastureController.update);
+routes.delete('/pastures/:id', permit(['ADMIN']), PastureController.delete);
+
 
 module.exports = routes;
