@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
 "scripts": {
-    "start": "npm run migrate && node server.js",   // Comentário para forçar a atualização
+    "start": "npm run migrate && node server.js", 
     "dev": "cross-env DB_HOST=localhost DB_PORT=5434 DB_USER=docker DB_PASSWORD=docker DB_NAME=bovmonitor npm run dev:nodemon",
     "dev:nodemon": "nodemon server.js",
     "migrate": "knex migrate:latest"
