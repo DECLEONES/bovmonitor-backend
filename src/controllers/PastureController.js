@@ -1,101 +1,75 @@
-// src/controllers/PastureController.js
-const connection = require('../db/connection.js');
+const connection = require('../db/connection');
 
 module.exports = {
-  // Método para LISTAR todos os pastos do usuário
-  async index(request, response) {
-    const user_id = request.userId;
-
+  async index(req, res) {
     try {
       const pastures = await connection('pastures')
-        .where('user_id', user_id)
+        .where('user_id', req.userId)
         .select('*');
-
-      return response.json(pastures);
+      return res.json(pastures);
     } catch (error) {
-      console.error(error);
-      return response.status(500).json({ error: 'Erro ao buscar pastos.' });
+      return res.status(500).json({ error: 'Erro ao listar pastos.' });
     }
   },
 
-  // Método para CRIAR um novo pasto
-  async create(request, response) {
-    const { name, description, status } = request.body;
-    const user_id = request.userId;
-
+  async create(req, res) {
     try {
+      const { name, description, status } = req.body;
+      const user_id = req.userId;
+
       const [id] = await connection('pastures').insert({
         name,
         description,
         status,
         user_id,
-      }).returning('id');
-
-      return response.status(201).json({ id });
-    } catch (error) {
-      console.error(error);
-      return response.status(400).json({ error: 'Erro ao cadastrar pasto.' });
-    }
-  },
-
-  // Método para ATUALIZAR um pasto
-  async update(request, response) {
-    const { id } = request.params;
-    const { name, description, status } = request.body;
-    const user_id = request.userId;
-
-    try {
-      const pasture = await connection('pastures')
-        .where('id', id)
-        .select('user_id')
-        .first();
-
-      if (!pasture) {
-        return response.status(404).json({ error: 'Pasto não encontrado.' });
-      }
-
-      if (pasture.user_id !== user_id) {
-        return response.status(403).json({ error: 'Operação não permitida.' });
-      }
-
-      await connection('pastures').where('id', id).update({
-        name,
-        description,
-        status
       });
 
-      return response.json({ message: 'Pasto atualizado com sucesso!' });
+      return res.status(201).json({ id });
     } catch (error) {
-      console.error(error);
-      return response.status(500).json({ error: 'Erro interno ao atualizar o pasto.' });
+      return res.status(400).json({ error: 'Erro ao cadastrar pasto.' });
     }
   },
 
-  // Método para DELETAR um pasto
-  async delete(request, response) {
-    const { id } = request.params;
-    const user_id = request.userId;
-
+  async update(req, res) {
     try {
-      const pasture = await connection('pastures')
-        .where('id', id)
-        .select('user_id')
-        .first();
+      const { id } = req.params;
+      const { name, description, status } = req.body;
+      const user_id = req.userId;
 
-      if (!pasture) {
-        return response.status(404).json({ error: 'Pasto não encontrado.' });
+      const updated = await connection('pastures')
+        .where({ id: id, user_id: user_id })
+        .update({
+          name,
+          description,
+          status,
+        });
+
+      if (updated === 0) {
+        return res.status(404).json({ error: 'Pasto não encontrado ou permissão negada.' });
       }
 
-      if (pasture.user_id !== user_id) {
-        return response.status(403).json({ error: 'Operação não permitida.' });
-      }
-
-      await connection('pastures').where('id', id).delete();
-
-      return response.status(204).send();
+      return res.status(200).json({ message: 'Pasto atualizado com sucesso.' });
     } catch (error) {
-      console.error(error);
-      return response.status(500).json({ error: 'Erro interno ao deletar o pasto.' });
+      return res.status(500).json({ error: 'Erro ao atualizar pasto.' });
+    }
+  },
+
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const user_id = req.userId;
+
+      const deleted = await connection('pastures')
+        .where({ id: id, user_id: user_id })
+        .delete();
+
+      if (deleted === 0) {
+        return res.status(404).json({ error: 'Pasto não encontrado ou permissão negada.' });
+      }
+
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ error: 'Erro ao deletar pasto.' });
     }
   }
 };

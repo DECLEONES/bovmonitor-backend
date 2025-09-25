@@ -1,16 +1,13 @@
 const express = require('express');
 
-// Importação de todos os Controllers
+// Importação dos Controllers que existem
 const UserController = require('../controllers/UserController');
 const SessionController = require('../controllers/SessionController');
 const DashboardController = require('../controllers/DashboardController');
 const AnimalController = require('../controllers/AnimalController');
 const WeightController = require('../controllers/WeightController');
 const EventController = require('../controllers/EventController');
-const VaccineController = require('../controllers/VaccineController');
-// 1. Importamos o novo PastureController
 const PastureController = require('../controllers/PastureController');
-
 // Middlewares
 const authMiddleware = require('../middlewares/auth.js');
 const permit = require('../middlewares/authRole.js');
@@ -21,7 +18,7 @@ const routes = express.Router();
 routes.post('/users', UserController.create);
 routes.post('/sessions', SessionController.create);
 
-// --- Middleware de Autenticação (todas as rotas abaixo exigem login) ---
+// --- Middleware de Autenticação ---
 routes.use(authMiddleware);
 
 // --- Rotas Protegidas ---
@@ -38,20 +35,14 @@ routes.delete('/animals/:id', permit(['ADMIN']), AnimalController.delete);
 routes.get('/animals/:animal_id/weights', WeightController.index);
 routes.post('/animals/:animal_id/weights', permit(['ADMIN', 'FUNCIONARIO']), WeightController.create);
 
-// Rotas de Vacinas
-routes.get('/animals/:animal_id/vaccines', VaccineController.index);
-routes.post('/animals/:animal_id/vaccines', permit(['ADMIN', 'FUNCIONARIO']), VaccineController.create);
-
 // Rotas de Eventos
 routes.get('/events', EventController.index);
 routes.post('/events', permit(['ADMIN', 'FUNCIONARIO']), EventController.create);
 
-// 2. Adicionamos as novas rotas para Pastos
 // --- Rotas de Pastos ---
 routes.get('/pastures', PastureController.index);
 routes.post('/pastures', permit(['ADMIN', 'FUNCIONARIO']), PastureController.create);
 routes.put('/pastures/:id', permit(['ADMIN', 'FUNCIONARIO']), PastureController.update);
 routes.delete('/pastures/:id', permit(['ADMIN']), PastureController.delete);
-
 
 module.exports = routes;
